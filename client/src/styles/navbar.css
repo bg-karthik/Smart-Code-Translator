@@ -1,0 +1,129 @@
+/* ===== Navbar ===== */
+
+.navbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid #e5e5e5;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+}
+
+/* 🔥 Page Themes */
+.navbar-editor {
+  background: #ffffff;
+}
+
+.navbar-history {
+  background: #f5f7fb;
+}
+
+/* LEFT */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.navbar-brand {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111111;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+/* LINKS */
+.navbar-links {
+  display: flex;
+  gap: 4px;
+}
+
+.navbar-link {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 6px;
+  color: #666666;
+  transition: all 0.2s ease;
+}
+
+.navbar-link:hover {
+  color: #111111;
+  background: #f5f5f5;
+}
+
+/* 🔥 ACTIVE TAB */
+.navbar-link.active {
+  background: #111111;
+  color: #ffffff;
+}
+
+/* RIGHT */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Avatar */
+.navbar-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 🔥 Avatar fallback */
+.navbar-avatar.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111111;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Username */
+.navbar-username {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333333;
+  white-space: nowrap;
+}
+
+/* Logout button */
+.navbar-logout {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666666;
+  background: none;
+  border: 1px solid #e5e5e5;
+  padding: 5px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.navbar-logout:hover {
+  color: #111111;
+  border-color: #111111;
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0 12px;
+  }
+
+  .navbar-left {
+    gap: 12px;
+  }
+
+  .navbar-username {
+    display: none;
+  }
+}
