@@ -3,8 +3,10 @@ import User from "../models/User.model.js";
 import { generateToken } from "../utils/jwt.utils.js";
 import { verifyGoogleToken } from "../config/google.config.js";
 
+// 🔹 Register
 export const register = async (name, email, password) => {
   const existing = await User.findOne({ email });
+
   if (existing) {
     const error = new Error("Email already registered.");
     error.statusCode = 409;
@@ -12,7 +14,13 @@ export const register = async (name, email, password) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({ name, email, password: hashedPassword });
+
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
+
   const token = generateToken(user);
 
   return {
@@ -26,8 +34,10 @@ export const register = async (name, email, password) => {
   };
 };
 
+// 🔹 Email Login
 export const emailLogin = async (email, password) => {
   const user = await User.findOne({ email });
+
   if (!user || !user.password) {
     const error = new Error("Invalid email or password.");
     error.statusCode = 401;
@@ -35,6 +45,7 @@ export const emailLogin = async (email, password) => {
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
+
   if (!isMatch) {
     const error = new Error("Invalid email or password.");
     error.statusCode = 401;
@@ -43,6 +54,7 @@ export const emailLogin = async (email, password) => {
 
   user.lastLogin = new Date();
   await user.save();
+
   const token = generateToken(user);
 
   return {
@@ -56,24 +68,37 @@ export const emailLogin = async (email, password) => {
   };
 };
 
+// 🔹 Google Login (FIXED)
 export const googleLogin = async (credential) => {
   const googleUser = await verifyGoogleToken(credential);
 
-  let user = await User.findOneAndUpdate(
-    { googleId: googleUser.googleId },
-    {
+  // 🔥 1. Check user by EMAIL (important fix)
+  let user = await User.findOne({ email: googleUser.email });
+
+  if (user) {
+    // 🔹 2. Update existing user
+    if (!user.googleId) {
+      user.googleId = googleUser.googleId;
+    }
+
+    user.name = googleUser.name;
+    user.picture = googleUser.picture;
+    user.lastLogin = new Date();
+
+    await user.save();
+  } else {
+    // 🔹 3. Create new user
+    user = await User.create({
       googleId: googleUser.googleId,
       email: googleUser.email,
       name: googleUser.name,
       picture: googleUser.picture,
+      password: null, // Google users don't need password
       lastLogin: new Date(),
-    },
-    {
-      returnDocument: "after",
-      upsert: true,
-    },
-  );
+    });
+  }
 
+  // 🔹 4. Generate token
   const token = generateToken(user);
 
   return {
@@ -87,6 +112,7 @@ export const googleLogin = async (credential) => {
   };
 };
 
+// 🔹 Get User Profile
 export const getUserProfile = async (userId) => {
   const user = await User.findById(userId).select("-__v -googleId");
 

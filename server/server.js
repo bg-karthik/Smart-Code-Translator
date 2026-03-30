@@ -10,19 +10,24 @@ const startServer = async () => {
   try {
     console.log("🚀 Starting server...");
 
-    // Check env loading
+    // 🔹 Validate env
     if (!process.env.MONGODB_URI) {
-      throw new Error("MONGODB_URI is missing in .env");
+      throw new Error("MONGODB_URI is missing in environment variables");
     }
 
-    // Connect to database
+    // 🔹 Connect DB
     await connectDB();
-
     console.log("✅ Database connected successfully");
 
-    // Start server
-    app.listen(PORT, () => {
-      console.log(`🌐 Server is running on port ${PORT}`);
+    // 🔹 Start server
+    const server = app.listen(PORT, () => {
+      console.log(`🌐 Server running on port ${PORT}`);
+    });
+
+    // 🔥 Handle server errors
+    server.on("error", (err) => {
+      console.error("❌ Server error:", err);
+      process.exit(1);
     });
 
   } catch (error) {
@@ -30,5 +35,17 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+// 🔥 Handle unhandled promise rejections
+process.on("unhandledRejection", (err) => {
+  console.error("❌ Unhandled Rejection:", err.message);
+  process.exit(1);
+});
+
+// 🔥 Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err.message);
+  process.exit(1);
+});
 
 startServer();

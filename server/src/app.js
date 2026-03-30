@@ -8,16 +8,20 @@ import {
 
 const app = express();
 
-// Allow our React frontend to talk to this backend
+// Allow frontend
 app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
 
-// Convert incoming JSON requests to JavaScript objects
+// Parse JSON
 app.use(express.json());
 
-// Mount all API routes under /api
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
+
+// 🔹 API routes
 app.use("/api", routes);
 
-// Handle errors
+// 🔹 Error handlers
 app.use(notFoundHandler);
 app.use(errorHandler);
 
