@@ -1,5 +1,12 @@
 # 🚀 Smart Code Translator
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-green)](https://smart-code-translator.vercel.app)
+
+🌐 **Live Demo:** https://smart-code-translator.vercel.app  
+📦 **Backend API:** https://smart-code-translator.onrender.com
+
+---
+
 An AI-powered web application that helps developers **translate, analyze, optimize, and understand code** across multiple programming languages.
 
 ---
