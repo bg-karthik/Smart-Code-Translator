@@ -1,6 +1,6 @@
 # 🚀 Smart Code Translator
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-green)](https://smart-code-translator.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-green)](https://smartcodetranslator.vercel.app)
 
 🌐 **Live Demo:** https://smart-code-translator.vercel.app  
 📦 **Backend API:** https://smart-code-translator.onrender.com
