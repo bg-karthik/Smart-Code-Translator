@@ -11,6 +11,12 @@ const verifyGoogleToken = async (credential) => {
 
     const payload = ticket.getPayload();
 
+    if (!payload || !payload.email) {
+      const err = new Error("Invalid Google token payload.");
+      err.statusCode = 401;
+      throw err;
+    }
+
     return {
       googleId: payload.sub,
       email: payload.email,
@@ -18,7 +24,12 @@ const verifyGoogleToken = async (credential) => {
       picture: payload.picture,
     };
   } catch (error) {
-    throw new Error("Invalid Google token");
+    if (error.statusCode) {
+      throw error;
+    }
+    const authError = new Error("Invalid or expired Google credential.");
+    authError.statusCode = 401;
+    throw authError;
   }
 };
 

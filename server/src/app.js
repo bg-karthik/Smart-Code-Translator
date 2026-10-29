@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import corsOptions from "./config/cors.config.js";
 import routes from "./routes/index.js";
 import {
   errorHandler,
@@ -8,8 +9,8 @@ import {
 
 const app = express();
 
-// Allow frontend
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
+// Secure CORS middleware
+app.use(cors(corsOptions));
 
 // Parse JSON
 app.use(express.json());

@@ -31,6 +31,8 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const hasGoogleAuth = !!import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
   // 🔹 If already logged in
   if (user) return <Navigate to={from} replace />;
 
@@ -39,12 +41,13 @@ function LoginPage() {
     e.preventDefault();
     if (loading) return;
 
+    const trimmedEmail = (email || "").trim();
     // Validation
-    if (!email || !password) {
-      return toast.error("Please fill in all fields.");
+    if (!trimmedEmail || !password) {
+      return toast.error("Please fill in all required fields.");
     }
 
-    if (isSignUp && !name) {
+    if (isSignUp && !name.trim()) {
       return toast.error("Please enter your name.");
     }
 
@@ -56,23 +59,23 @@ function LoginPage() {
 
     try {
       const result = isSignUp
-        ? await register(name, email, password)
-        : await emailLogin(email, password);
+        ? await register(name.trim(), trimmedEmail, password)
+        : await emailLogin(trimmedEmail, password);
 
       login(result.token, result.user);
-
       toast.success(
         isSignUp
           ? `Welcome, ${result.user.name}!`
           : `Welcome back, ${result.user.name}!`
       );
-
       navigate(from, { replace: true });
     } catch (err) {
-      console.error(err);
-      toast.error(
-        err.response?.data?.message || "Authentication failed."
-      );
+      console.error("Auth error:", err);
+      const message =
+        err.formattedMessage ||
+        err.response?.data?.message ||
+        "Authentication failed. Please check your credentials.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -81,22 +84,21 @@ function LoginPage() {
   // 🔹 Google login
   const handleGoogleSuccess = async (credentialResponse) => {
     if (!credentialResponse?.credential) {
-      return toast.error("Google login failed.");
+      return toast.error("Google login failed: No credential received.");
     }
 
     try {
       const result = await googleLogin(credentialResponse.credential);
-
       login(result.token, result.user);
-
       toast.success(`Welcome, ${result.user.name}!`);
-
       navigate(from, { replace: true });
     } catch (err) {
-      console.error(err);
-      toast.error(
-        err.response?.data?.message || "Google login failed."
-      );
+      console.error("Google Auth error:", err);
+      const message =
+        err.formattedMessage ||
+        err.response?.data?.message ||
+        "Google authentication failed. Please try again.";
+      toast.error(message);
     }
   };
 
@@ -156,6 +158,7 @@ function LoginPage() {
                 placeholder="Full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                autoComplete="name"
               />
             )}
 
@@ -165,6 +168,7 @@ function LoginPage() {
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
             />
 
             <input
@@ -173,6 +177,7 @@ function LoginPage() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete={isSignUp ? "new-password" : "current-password"}
             />
 
             <button
@@ -190,21 +195,37 @@ function LoginPage() {
 
           {/* 🔹 Toggle */}
           <p className="login-toggle">
-            {isSignUp
-              ? "Already have an account?"
-              : "Don't have an account?"}{" "}
-            <button
-              type="button"
-              className="login-toggle-btn"
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setName("");
-                setEmail("");
-                setPassword("");
-              }}
-            >
-              {isSignUp ? "Sign In" : "Sign Up"}
-            </button>
+            {isSignUp ? (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  className="login-toggle-btn"
+                  onClick={() => {
+                    setIsSignUp(false);
+                    setName("");
+                    setPassword("");
+                  }}
+                >
+                  Sign In
+                </button>
+              </>
+            ) : (
+              <>
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  className="login-toggle-btn"
+                  onClick={() => {
+                    setIsSignUp(true);
+                    setName("");
+                    setPassword("");
+                  }}
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
           </p>
 
           {/* Divider */}
@@ -214,15 +235,25 @@ function LoginPage() {
 
           {/* 🔹 Google login */}
           <div className="login-google-wrapper">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => toast.error("Google login failed.")}
-              theme="outline"
-              shape="rectangular"
-              size="large"
-              text="continue_with"
-              width="300"
-            />
+            {hasGoogleAuth ? (
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() =>
+                  toast.error(
+                    "Google login failed. Ensure popups are allowed and origin is authorized."
+                  )
+                }
+                theme="outline"
+                shape="rectangular"
+                size="large"
+                text="continue_with"
+                width="300"
+              />
+            ) : (
+              <p style={{ fontSize: "12px", color: "#888" }}>
+                Google Sign-In is unavailable (Missing VITE_GOOGLE_CLIENT_ID).
+              </p>
+            )}
           </div>
 
           <p className="login-terms">

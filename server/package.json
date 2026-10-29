@@ -8,7 +8,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node --test tests/auth.test.js"
   },
   "dependencies": {
     "@google/genai": "1.44.0",

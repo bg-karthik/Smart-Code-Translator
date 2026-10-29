@@ -44,6 +44,9 @@ export const googleAuth = async (req, res, next) => {
     const result = await authService.googleLogin(credential);
     return res.json({ success: true, data: result });
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ success: false, message: error.message });
+    }
     next(error);
   }
 };
