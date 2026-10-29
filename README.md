@@ -2,7 +2,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-green)](smartcodetranslator.vercel.app)
 
-🌐 **Live Demo:** smartcodetranslator.vercel.app 
+🌐 **Live Demo:** https://smartcodetranslator.vercel.app
 
 ---
 
