@@ -21,12 +21,19 @@ process.env.NODE_ENV = "test";
 process.env.JWT_SECRET = process.env.JWT_SECRET || "test-jwt-secret-key-12345";
 process.env.CLIENT_URL = "https://smartcodetranslator.vercel.app,http://localhost:5173";
 
-// Import app, models, prompts, and formatters
+// Import app, models, prompts, formatters, and rate limiters
 const { default: app } = await import("../src/app.js");
 const { default: User } = await import("../src/models/User.model.js");
 const { default: History } = await import("../src/models/History.model.js");
 const { TRANSLATE_PROMPT } = await import("../src/constants/prompts.js");
 const { formatApiErrorMessage } = await import("../../client/src/services/api.js");
+const {
+  authRateLimiter,
+  aiRateLimiter,
+  resolveAuthLimit,
+  resolveAiLimit,
+  shouldSkipRateLimit,
+} = await import("../src/middleware/rateLimiter.middleware.js");
 
 let server;
 let baseUrl;
@@ -464,5 +471,42 @@ describe("Authentication & Security Test Suite", () => {
 
     // Cleanup test doc
     await History.deleteOne({ _id: testDoc._id });
+  });
+
+  it("20. Rate Limiter Production Hardening: Proves x-test-rate-limit header cannot alter thresholds in production mode", async () => {
+    const originalEnv = process.env.NODE_ENV;
+    try {
+      // 1. In production mode, test headers must NEVER alter thresholds or cause skipping
+      process.env.NODE_ENV = "production";
+
+      const mockReqWithHeader = {
+        headers: { "x-test-rate-limit": "true" },
+        ip: "192.168.1.1",
+      };
+      const mockReqWithoutHeader = {
+        headers: {},
+        ip: "192.168.1.1",
+      };
+
+      assert.equal(resolveAuthLimit(mockReqWithHeader), 20, "Production auth limit must remain 20 even when x-test-rate-limit is supplied");
+      assert.equal(resolveAuthLimit(mockReqWithoutHeader), 20, "Production auth limit must remain 20 without header");
+
+      assert.equal(resolveAiLimit(mockReqWithHeader), 30, "Production AI limit must remain 30 even when x-test-rate-limit is supplied");
+      assert.equal(resolveAiLimit(mockReqWithoutHeader), 30, "Production AI limit must remain 30 without header");
+
+      assert.equal(shouldSkipRateLimit(mockReqWithHeader), false, "Production auth rate limiter must never skip requests");
+      assert.equal(shouldSkipRateLimit(mockReqWithoutHeader), false, "Production rate limiter must never skip requests");
+
+      // 2. In test mode, thresholds adjust only when x-test-rate-limit is explicitly provided
+      process.env.NODE_ENV = "test";
+      assert.equal(resolveAuthLimit(mockReqWithHeader), 2, "Test mode auth limit drops to 2 when x-test-rate-limit is present");
+      assert.equal(resolveAuthLimit(mockReqWithoutHeader), 20, "Test mode auth limit defaults to 20 without header");
+      assert.equal(resolveAiLimit(mockReqWithHeader), 2, "Test mode AI limit drops to 2 when x-test-rate-limit is present");
+      assert.equal(resolveAiLimit(mockReqWithoutHeader), 30, "Test mode AI limit defaults to 30 without header");
+      assert.equal(shouldSkipRateLimit(mockReqWithHeader), false, "Test mode rate limiter does not skip when x-test-rate-limit is present");
+      assert.equal(shouldSkipRateLimit(mockReqWithoutHeader), true, "Test mode rate limiter skips routine tests when header is absent");
+    } finally {
+      process.env.NODE_ENV = originalEnv;
+    }
   });
 });
