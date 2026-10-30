@@ -9,6 +9,9 @@ import {
 
 const app = express();
 
+// Trust reverse proxy (Render / Cloudflare) to accurately capture client IP from X-Forwarded-For
+app.set("trust proxy", 1);
+
 // Secure CORS middleware
 app.use(cors(corsOptions));
 

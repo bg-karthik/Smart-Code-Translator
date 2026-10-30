@@ -67,6 +67,8 @@ export const formatApiErrorMessage = (error) => {
       return "The requested endpoint was not found.";
     case 409:
       return "An account with this email already exists.";
+    case 429:
+      return "Too many requests. Please slow down and try again in a few moments.";
     case 500:
     case 502:
     case 503:

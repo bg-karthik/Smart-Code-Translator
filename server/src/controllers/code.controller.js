@@ -3,6 +3,9 @@ import { analyzeComplexity } from "../services/complexity.service.js";
 import { optimizeCode } from "../services/optimization.service.js";
 import { explainCode } from "../services/explanation.service.js";
 import { createHistoryEntry } from "../services/history.service.js";
+import { isValidLanguageId } from "../constants/languages.js";
+
+const MAX_CODE_LENGTH = 25000;
 
 export const translate = async (req, res, next) => {
   try {
@@ -13,6 +16,28 @@ export const translate = async (req, res, next) => {
         message: "code, sourceLanguage, and targetLanguage are required.",
       });
     }
+
+    if (typeof code !== "string" || code.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "code must be a non-empty string.",
+      });
+    }
+
+    if (code.length > MAX_CODE_LENGTH) {
+      return res.status(400).json({
+        success: false,
+        message: `code exceeds maximum allowed length of ${MAX_CODE_LENGTH} characters.`,
+      });
+    }
+
+    if (!isValidLanguageId(sourceLanguage) || !isValidLanguageId(targetLanguage)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or unsupported sourceLanguage or targetLanguage.",
+      });
+    }
+
     const result = await translateCode(code, sourceLanguage, targetLanguage);
 
     // Fire and forget — save to history without blocking response
@@ -40,6 +65,28 @@ export const analyze = async (req, res, next) => {
         message: "code and language are required.",
       });
     }
+
+    if (typeof code !== "string" || code.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "code must be a non-empty string.",
+      });
+    }
+
+    if (code.length > MAX_CODE_LENGTH) {
+      return res.status(400).json({
+        success: false,
+        message: `code exceeds maximum allowed length of ${MAX_CODE_LENGTH} characters.`,
+      });
+    }
+
+    if (!isValidLanguageId(language)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or unsupported language.",
+      });
+    }
+
     const result = await analyzeComplexity(code, language);
 
     createHistoryEntry({
@@ -65,6 +112,28 @@ export const optimize = async (req, res, next) => {
         message: "code and language are required.",
       });
     }
+
+    if (typeof code !== "string" || code.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "code must be a non-empty string.",
+      });
+    }
+
+    if (code.length > MAX_CODE_LENGTH) {
+      return res.status(400).json({
+        success: false,
+        message: `code exceeds maximum allowed length of ${MAX_CODE_LENGTH} characters.`,
+      });
+    }
+
+    if (!isValidLanguageId(language)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or unsupported language.",
+      });
+    }
+
     const result = await optimizeCode(code, language);
 
     createHistoryEntry({
@@ -90,6 +159,28 @@ export const explain = async (req, res, next) => {
         message: "code and language are required.",
       });
     }
+
+    if (typeof code !== "string" || code.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "code must be a non-empty string.",
+      });
+    }
+
+    if (code.length > MAX_CODE_LENGTH) {
+      return res.status(400).json({
+        success: false,
+        message: `code exceeds maximum allowed length of ${MAX_CODE_LENGTH} characters.`,
+      });
+    }
+
+    if (!isValidLanguageId(language)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or unsupported language.",
+      });
+    }
+
     const result = await explainCode(code, language);
 
     createHistoryEntry({

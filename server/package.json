@@ -5,7 +5,7 @@
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
@@ -17,6 +17,7 @@
     "cors": "2.8.6",
     "dotenv": "17.3.1",
     "express": "5.2.1",
+    "express-rate-limit": "^8.7.2",
     "google-auth-library": "10.6.1",
     "jsonwebtoken": "9.0.3",
     "mongoose": "9.2.4"
